@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Course;
+use App\Models\Lesson;
 use App\Policies\CoursePolicy;
+use App\Policies\LessonPolicy;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -18,6 +20,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Course::class, CoursePolicy::class);
+        Gate::policy(Lesson::class, LessonPolicy::class);
 
         Relation::morphMap([
             'course'     => \App\Models\Course::class,

@@ -14,7 +14,6 @@ class Lesson extends Model
     use HasFactory, HasComments, HasCategories;
 
     protected $fillable = [
-        'course_id',
         'title',
         'content',
         'order',
