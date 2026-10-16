@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\LessonController;
@@ -37,4 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
         [CommentController::class, 'indexForAssignment']);
     Route::post('/courses/{course}/assignments/{assignment}/comments',
         [CommentController::class, 'storeForAssignment']);
+
+    Route::get('/categories',            [CategoryController::class, 'index']);
+    Route::get('/categories/{category}', [CategoryController::class, 'show']);
 });
