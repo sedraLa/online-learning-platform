@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\LessonController;
 use Illuminate\Support\Facades\Route;
@@ -21,4 +22,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/courses/{course}/lessons',             [LessonController::class, 'store']);
     Route::patch('/courses/{course}/lessons/{lesson}',   [LessonController::class, 'update']);
     Route::delete('/courses/{course}/lessons/{lesson}',  [LessonController::class, 'destroy']);
+
+    Route::get('/courses/{course}/comments',
+        [CommentController::class, 'indexForCourse']);
+    Route::post('/courses/{course}/comments',
+        [CommentController::class, 'storeForCourse']);
+
+    Route::get('/courses/{course}/lessons/{lesson}/comments',
+        [CommentController::class, 'indexForLesson']);
+    Route::post('/courses/{course}/lessons/{lesson}/comments',
+        [CommentController::class, 'storeForLesson']);
+
+    Route::get('/courses/{course}/assignments/{assignment}/comments',
+        [CommentController::class, 'indexForAssignment']);
+    Route::post('/courses/{course}/assignments/{assignment}/comments',
+        [CommentController::class, 'storeForAssignment']);
 });

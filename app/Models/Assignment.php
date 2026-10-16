@@ -13,7 +13,6 @@ class Assignment extends Model
     use HasFactory, HasComments, HasCategories;
 
     protected $fillable = [
-        'course_id',
         'title',
         'description',
         'due_date',
