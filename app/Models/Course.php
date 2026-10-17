@@ -7,17 +7,17 @@ use App\Enums\CourseStatus;
 use App\Models\Scopes\PublishedScope;
 use App\Traits\HasCategories;
 use App\Traits\HasComments;
+use App\Traits\HasImage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class Course extends Model
 {
-    use HasFactory, HasComments, HasCategories;
+    use HasFactory, HasComments, HasCategories, HasImage;
 
     protected $fillable = [
         'title',
@@ -87,10 +87,5 @@ class Course extends Model
     {
         return $this->belongsToMany(User::class, 'enrollments')
                     ->withPivot('enrolled_at');
-    }
-
-    public function image(): MorphOne
-    {
-        return $this->morphOne(Image::class, 'imageable');
     }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\LessonController;
 use Illuminate\Support\Facades\Route;
 
@@ -41,4 +42,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/categories',            [CategoryController::class, 'index']);
     Route::get('/categories/{category}', [CategoryController::class, 'show']);
+
+    Route::post('/courses/{course}/image',                         [ImageController::class, 'forCourse']);
+    Route::post('/courses/{course}/lessons/{lesson}/image',        [ImageController::class, 'forLesson']);
+    Route::post('/assignments/{assignment}/image',                  [ImageController::class, 'forAssignment']);
+    Route::post('/me/image',                                        [ImageController::class, 'forMe']);
 });

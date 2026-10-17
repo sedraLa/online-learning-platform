@@ -4,13 +4,14 @@ namespace App\Models;
 
 use App\Traits\HasCategories;
 use App\Traits\HasComments;
+use App\Traits\HasImage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Assignment extends Model
 {
-    use HasFactory, HasComments, HasCategories;
+    use HasFactory, HasComments, HasCategories, HasImage;
 
     protected $fillable = [
         'title',
