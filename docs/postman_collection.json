@@ -1,0 +1,819 @@
+{
+  "info": {
+    "name": "Online Learning Platform API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Week 5 assignment — Laravel 12 API. Base URL: http://127.0.0.1:8000/api\n\nSeeded sample credentials (password for all: password):\n  Teacher: alice@example.com\n  Teacher: bob@example.com\n  Student: carol@example.com (enrolled in courses 1 and 4)\n  Student: dan@example.com\n  Student: eve@example.com\n\nRun '01 Login (Teacher)' first. The test script saves the token to the {{token}} variable automatically."
+  },
+  "variable": [
+    { "key": "base_url",      "value": "http://127.0.0.1:8000/api" },
+    { "key": "token",         "value": "" },
+    { "key": "course_id",     "value": "1" },
+    { "key": "draft_course_id", "value": "3" },
+    { "key": "lesson_id",     "value": "1" },
+    { "key": "assignment_id", "value": "1" },
+    { "key": "category_id",   "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "01 Auth",
+      "item": [
+        {
+          "name": "01 Login (Teacher) — 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "    pm.test('Token saved', function() { pm.expect(json.token).to.be.a('string'); });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",       "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alice@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+          }
+        },
+        {
+          "name": "02 Login (Student) — 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "    pm.test('Token saved', function() { pm.expect(json.token).to.be.a('string'); });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",       "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"carol@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+          }
+        },
+        {
+          "name": "03 Login — Wrong password — 401",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",       "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alice@example.com\",\n  \"password\": \"wrongpassword\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+          }
+        },
+        {
+          "name": "04 Login — Missing fields — 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",       "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+          }
+        },
+        {
+          "name": "05 GET /me — 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",         "value": "application/json" },
+              { "key": "Authorization",  "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/me", "host": ["{{base_url}}"], "path": ["me"] }
+          }
+        },
+        {
+          "name": "06 GET /me — No token — 401",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/me", "host": ["{{base_url}}"], "path": ["me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Courses",
+      "item": [
+        {
+          "name": "01 GET /courses — List (published for student) — 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses", "host": ["{{base_url}}"], "path": ["courses"] }
+          }
+        },
+        {
+          "name": "02 GET /courses — Filter by level=beginner — 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/courses?level=beginner",
+              "host": ["{{base_url}}"],
+              "path": ["courses"],
+              "query": [{ "key": "level", "value": "beginner" }]
+            }
+          }
+        },
+        {
+          "name": "03 GET /courses — Filter free=1 — 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/courses?free=1",
+              "host": ["{{base_url}}"],
+              "path": ["courses"],
+              "query": [{ "key": "free", "value": "1" }]
+            }
+          }
+        },
+        {
+          "name": "04 GET /courses/{course_id} — Show — 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}"] }
+          }
+        },
+        {
+          "name": "05 GET /courses/99999 — Not found — 404",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/99999", "host": ["{{base_url}}"], "path": ["courses", "99999"] }
+          }
+        },
+        {
+          "name": "06 POST /courses — Create (teacher) — 201",
+          "description": "Run '01 Login (Teacher)' first to get a teacher token.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"New Test Course\",\n  \"description\": \"Created via Postman\",\n  \"status\": \"draft\",\n  \"level\": \"beginner\",\n  \"is_free\": true\n}"
+            },
+            "url": { "raw": "{{base_url}}/courses", "host": ["{{base_url}}"], "path": ["courses"] }
+          }
+        },
+        {
+          "name": "07 POST /courses — Create as student — 403",
+          "description": "Run '02 Login (Student)' first, then send this request.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Student Course\",\n  \"description\": \"Should fail\",\n  \"status\": \"draft\",\n  \"level\": \"beginner\",\n  \"is_free\": true\n}"
+            },
+            "url": { "raw": "{{base_url}}/courses", "host": ["{{base_url}}"], "path": ["courses"] }
+          }
+        },
+        {
+          "name": "08 POST /courses — Missing required fields — 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/courses", "host": ["{{base_url}}"], "path": ["courses"] }
+          }
+        },
+        {
+          "name": "09 POST /courses — Invalid enum value — 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Test\",\n  \"status\": \"invalid_status\",\n  \"level\": \"beginner\",\n  \"is_free\": true\n}"
+            },
+            "url": { "raw": "{{base_url}}/courses", "host": ["{{base_url}}"], "path": ["courses"] }
+          }
+        },
+        {
+          "name": "10 PATCH /courses/{course_id} — Partial update (owner teacher) — 200",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Title\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}"] }
+          }
+        },
+        {
+          "name": "11 DELETE /courses/{course_id} — Not owner — 403",
+          "description": "Login as bob@example.com (teacher) then try to delete alice's course (id 1).",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Lessons",
+      "item": [
+        {
+          "name": "01 GET /courses/{course_id}/lessons — List — 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/lessons", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "lessons"] }
+          }
+        },
+        {
+          "name": "02 GET /courses/{draft_course_id}/lessons — Draft as student — 404",
+          "description": "Login as a student, then request lessons from a draft course (id 3).",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/{{draft_course_id}}/lessons", "host": ["{{base_url}}"], "path": ["courses", "{{draft_course_id}}", "lessons"] }
+          }
+        },
+        {
+          "name": "03 GET /courses/{course_id}/lessons/{lesson_id} — Show — 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/lessons/{{lesson_id}}", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "lessons", "{{lesson_id}}"] }
+          }
+        },
+        {
+          "name": "04 POST /courses/{course_id}/lessons — Create (owner teacher) — 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"New Lesson\",\n  \"content\": \"Lesson content here\",\n  \"order\": 10\n}"
+            },
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/lessons", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "lessons"] }
+          }
+        },
+        {
+          "name": "05 POST /courses/{course_id}/lessons — Student — 403",
+          "description": "Login as student first.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Unauthorized Lesson\",\n  \"content\": \"Should fail\",\n  \"order\": 1\n}"
+            },
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/lessons", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "lessons"] }
+          }
+        },
+        {
+          "name": "06 POST /courses/{course_id}/lessons — Missing fields — 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"No title or order\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/lessons", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "lessons"] }
+          }
+        },
+        {
+          "name": "07 POST /courses/{course_id}/lessons — Negative order — 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Test\",\n  \"order\": -1\n}"
+            },
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/lessons", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "lessons"] }
+          }
+        },
+        {
+          "name": "08 PATCH /courses/{course_id}/lessons/{lesson_id} — Partial update — 200",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Lesson Title\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/lessons/{{lesson_id}}", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "lessons", "{{lesson_id}}"] }
+          }
+        },
+        {
+          "name": "09 GET /courses/1/lessons/6 — Lesson from different course — 404",
+          "description": "Lesson 6 belongs to course 2 (or 4), not course 1. Expect 404.",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/1/lessons/6", "host": ["{{base_url}}"], "path": ["courses", "1", "lessons", "6"] }
+          }
+        },
+        {
+          "name": "10 DELETE /courses/{course_id}/lessons/{lesson_id} — Owner teacher — 200",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/lessons/{{lesson_id}}", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "lessons", "{{lesson_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Comments",
+      "item": [
+        {
+          "name": "01 GET /comments/latest — Latest 20 comments — 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/comments/latest", "host": ["{{base_url}}"], "path": ["comments", "latest"] }
+          }
+        },
+        {
+          "name": "02 GET /courses/{course_id}/comments — Comments on course — 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/comments", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "comments"] }
+          }
+        },
+        {
+          "name": "03 GET /courses/{draft_course_id}/comments — Draft course — 404",
+          "description": "Login as student. Course 3 is a draft — expect 404.",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/{{draft_course_id}}/comments", "host": ["{{base_url}}"], "path": ["courses", "{{draft_course_id}}", "comments"] }
+          }
+        },
+        {
+          "name": "04 POST /courses/{course_id}/comments — Enrolled student — 201",
+          "description": "Login as carol@example.com (enrolled in course 1). Expect 201.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Great course!\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/comments", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "comments"] }
+          }
+        },
+        {
+          "name": "05 POST /courses/{course_id}/comments — Teacher — 403",
+          "description": "Login as alice@example.com (teacher). Teachers cannot comment.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Teacher comment attempt\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/comments", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "comments"] }
+          }
+        },
+        {
+          "name": "06 POST /courses/4/comments — Student not enrolled — 403",
+          "description": "Login as carol@example.com. Carol is not enrolled in course 4 (Python). Expect 403.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Not enrolled here\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/courses/4/comments", "host": ["{{base_url}}"], "path": ["courses", "4", "comments"] }
+          }
+        },
+        {
+          "name": "07 POST /courses/{course_id}/comments — Empty body — 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/comments", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "comments"] }
+          }
+        },
+        {
+          "name": "08 GET /courses/{course_id}/lessons/{lesson_id}/comments — 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/lessons/{{lesson_id}}/comments", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "lessons", "{{lesson_id}}", "comments"] }
+          }
+        },
+        {
+          "name": "09 POST /courses/{course_id}/lessons/{lesson_id}/comments — Enrolled student — 201",
+          "description": "Login as carol@example.com (enrolled in course 1).",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"This lesson was very clear!\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/lessons/{{lesson_id}}/comments", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "lessons", "{{lesson_id}}", "comments"] }
+          }
+        },
+        {
+          "name": "10 GET /courses/{course_id}/assignments/{assignment_id}/comments — 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/assignments/{{assignment_id}}/comments", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "assignments", "{{assignment_id}}", "comments"] }
+          }
+        },
+        {
+          "name": "11 POST /courses/{course_id}/assignments/{assignment_id}/comments — Enrolled student — 201",
+          "description": "Login as carol@example.com (enrolled in course 1).",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"When is this assignment due?\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/assignments/{{assignment_id}}/comments", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "assignments", "{{assignment_id}}", "comments"] }
+          }
+        },
+        {
+          "name": "12 POST /courses/1/assignments/99999/comments — Wrong assignment — 404",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Should 404\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/courses/1/assignments/99999/comments", "host": ["{{base_url}}"], "path": ["courses", "1", "assignments", "99999", "comments"] }
+          }
+        },
+        {
+          "name": "13 GET /courses/{course_id}/comments — No token — 401",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/comments", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "comments"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Categories",
+      "item": [
+        {
+          "name": "01 GET /categories — List all — 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"] }
+          }
+        },
+        {
+          "name": "02 GET /categories/{category_id} — Show with content — 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/categories/{{category_id}}", "host": ["{{base_url}}"], "path": ["categories", "{{category_id}}"] }
+          }
+        },
+        {
+          "name": "03 GET /categories/99999 — Not found — 404",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/categories/99999", "host": ["{{base_url}}"], "path": ["categories", "99999"] }
+          }
+        },
+        {
+          "name": "04 GET /categories — No token — 401",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Images",
+      "item": [
+        {
+          "name": "01 POST /courses/{course_id}/image — Owner teacher — 200",
+          "description": "Login as alice@example.com first.\n\nIn the Body tab, select form-data and add a key named 'image' with type File. Select a JPEG, PNG, or WebP image from your computer (max 2 MB).",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "",
+                  "description": "Select a local JPEG, PNG, or WebP image file (max 2 MB)"
+                }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/image", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "image"] }
+          }
+        },
+        {
+          "name": "02 POST /courses/{course_id}/image — Student — 403",
+          "description": "Login as carol@example.com. Students cannot upload course images.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "image", "type": "file", "src": "", "description": "Select any image file" }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/image", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "image"] }
+          }
+        },
+        {
+          "name": "03 POST /courses/{course_id}/image — No image field — 422",
+          "description": "Send an empty form-data body. Expect 422 with Arabic validation message.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/image", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "image"] }
+          }
+        },
+        {
+          "name": "04 POST /courses/{course_id}/lessons/{lesson_id}/image — Owner teacher — 200",
+          "description": "Login as alice@example.com. Select a local image file in the image field.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "image", "type": "file", "src": "", "description": "Select a local JPEG, PNG, or WebP image file (max 2 MB)" }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/lessons/{{lesson_id}}/image", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "lessons", "{{lesson_id}}", "image"] }
+          }
+        },
+        {
+          "name": "05 POST /courses/1/lessons/6/image — Lesson from different course — 404",
+          "description": "Lesson 6 belongs to a different course. Expect 404.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "image", "type": "file", "src": "", "description": "Select any image file" }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/courses/1/lessons/6/image", "host": ["{{base_url}}"], "path": ["courses", "1", "lessons", "6", "image"] }
+          }
+        },
+        {
+          "name": "06 POST /assignments/{assignment_id}/image — Owner teacher — 200",
+          "description": "Login as alice@example.com. Select a local image file.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "image", "type": "file", "src": "", "description": "Select a local JPEG, PNG, or WebP image file (max 2 MB)" }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/assignments/{{assignment_id}}/image", "host": ["{{base_url}}"], "path": ["assignments", "{{assignment_id}}", "image"] }
+          }
+        },
+        {
+          "name": "07 POST /me/image — Any authenticated user — 200",
+          "description": "Any user (teacher or student) may upload their own profile image. Select a local image file.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "image", "type": "file", "src": "", "description": "Select a local JPEG, PNG, or WebP image file (max 2 MB)" }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/me/image", "host": ["{{base_url}}"], "path": ["me", "image"] }
+          }
+        },
+        {
+          "name": "08 POST /me/image — No token — 401",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "image", "type": "file", "src": "" }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/me/image", "host": ["{{base_url}}"], "path": ["me", "image"] }
+          }
+        }
+      ]
+    }
+  ]
+}
