@@ -6,6 +6,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\LessonController;
+use App\Http\Controllers\LessonProgressController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -49,4 +50,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/courses/{course}/lessons/{lesson}/image',        [ImageController::class, 'forLesson']);
     Route::post('/assignments/{assignment}/image',                  [ImageController::class, 'forAssignment']);
     Route::post('/me/image',                                        [ImageController::class, 'forMe']);
+
+    Route::get('/courses/{course}/progress',                                      [LessonProgressController::class, 'index']);
+    Route::post('/courses/{course}/lessons/{lesson}/progress/complete',           [LessonProgressController::class, 'complete']);
+    Route::post('/courses/{course}/lessons/{lesson}/progress/incomplete',         [LessonProgressController::class, 'incomplete']);
 });

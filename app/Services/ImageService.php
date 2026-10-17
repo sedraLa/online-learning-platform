@@ -28,8 +28,6 @@ class ImageService
             throw $e;
         }
 
-        // Only delete the old physical file after the DB update succeeds,
-        // and only when the path points to a real file (not a seeded placeholder).
         if ($oldPath && $oldPath !== $newPath && Storage::disk($oldDisk)->exists($oldPath)) {
             Storage::disk($oldDisk)->delete($oldPath);
         }

@@ -41,16 +41,6 @@ class CommentController extends Controller
     public function latest(Request $request): JsonResponse
     {
         $user = $request->user();
-
-        // Load 20 most recent comments.
-        // user          — eager-loaded: 1 query for all authors.
-        // commentable   — morphTo eager-load grouped by type:
-        //   courses     — 1 query (with PublishedScope bypassed so teachers see their drafts)
-        //   lessons     — 1 query, with their courses in 1 further query
-        //   assignments — 1 query, with their courses in 1 further query
-        // Total: 1 (comments) + 1 (users) + 1 (courses) + 1 (lessons) + 1 (lesson courses)
-        //        + 1 (assignments) + 1 (assignment courses) = up to 7 queries.
-        // Absent types reduce the count; with only seeded course comments it is 3 queries.
         $comments = Comment::with([
             'user:id,name',
             'commentable' => function ($morphTo) {

@@ -32,14 +32,9 @@ class CategoryController extends Controller
 
         $courses = $coursesQuery->get();
 
-        // Collect the IDs of courses visible to this user, used to filter
-        // lessons and assignments without additional per-record queries.
         $visibleCourseIds = $courses->pluck('id');
 
         // --- Lessons ---
-        // Eager-load the course relationship on all lessons in this category,
-        // then keep only those whose course is in the visible set.
-        // This is two queries (lessons + their courses), not N.
         $lessons = $category->lessons()
             ->with(['course' => fn ($q) => $q->withoutGlobalScope(PublishedScope::class)])
             ->get()
@@ -47,7 +42,6 @@ class CategoryController extends Controller
             ->values();
 
         // --- Assignments ---
-        // Same approach as lessons.
         $assignments = $category->assignments()
             ->with(['course' => fn ($q) => $q->withoutGlobalScope(PublishedScope::class)])
             ->get()
