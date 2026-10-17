@@ -6,8 +6,10 @@ use App\Enums\CourseStatus;
 use App\Enums\UserRole;
 use App\Http\Requests\StoreCommentRequest;
 use App\Models\Assignment;
+use App\Models\Comment;
 use App\Models\Course;
 use App\Models\Lesson;
+use App\Models\Scopes\PublishedScope;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -34,6 +36,67 @@ class CommentController extends Controller
         }
 
         return null;
+    }
+
+    public function latest(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Load 20 most recent comments.
+        // user          — eager-loaded: 1 query for all authors.
+        // commentable   — morphTo eager-load grouped by type:
+        //   courses     — 1 query (with PublishedScope bypassed so teachers see their drafts)
+        //   lessons     — 1 query, with their courses in 1 further query
+        //   assignments — 1 query, with their courses in 1 further query
+        // Total: 1 (comments) + 1 (users) + 1 (courses) + 1 (lessons) + 1 (lesson courses)
+        //        + 1 (assignments) + 1 (assignment courses) = up to 7 queries.
+        // Absent types reduce the count; with only seeded course comments it is 3 queries.
+        $comments = Comment::with([
+            'user:id,name',
+            'commentable' => function ($morphTo) {
+                $morphTo->morphWith([
+                    Course::class => [
+                        fn ($q) => $q->withoutGlobalScope(PublishedScope::class),
+                    ],
+                    Lesson::class => [
+                        'course' => fn ($q) => $q->withoutGlobalScope(PublishedScope::class),
+                    ],
+                    Assignment::class => [
+                        'course' => fn ($q) => $q->withoutGlobalScope(PublishedScope::class),
+                    ],
+                ]);
+            },
+        ])
+        ->latest()
+        ->take(20)
+        ->get();
+
+        $comments = $comments->filter(function (Comment $comment) use ($user) {
+            $commentable = $comment->commentable;
+
+            if ($commentable === null) {
+                return false;
+            }
+
+            $course = match (true) {
+                $commentable instanceof Course     => $commentable,
+                $commentable instanceof Lesson     => $commentable->course,
+                $commentable instanceof Assignment => $commentable->course,
+                default                            => null,
+            };
+
+            if ($course === null) {
+                return false;
+            }
+
+            if ($user->role === UserRole::Teacher) {
+                return $course->user_id === $user->id;
+            }
+
+            return $course->status === CourseStatus::Published;
+        })->values();
+
+        return response()->json($comments);
     }
 
     public function indexForCourse(Request $request, Course $course): JsonResponse
