@@ -85,6 +85,46 @@ Seeded credentials (password: `password`):
 | GET | `/api/categories` | List all categories |
 | GET | `/api/categories/{category}` | Show category with attached courses, lessons, and assignments |
 
+### Lesson Progress
+| Method | URI | Description |
+|---|---|---|
+| GET | `/api/courses/{course}/progress` | View the authenticated student's progress for all lessons in a course |
+| POST | `/api/courses/{course}/lessons/{lesson}/progress/complete` | Mark a lesson as completed |
+| POST | `/api/courses/{course}/lessons/{lesson}/progress/incomplete` | Mark a completed lesson as incomplete |
+
+**Authorization rules:**
+- All three endpoints require authentication (`auth:sanctum`).
+- Only students may use these endpoints — teachers receive 403.
+- The course must be published — draft courses return 404.
+- The student must be enrolled in the course — unenrolled students receive 403.
+- The lesson must belong to the specified course — a mismatched lesson returns 404.
+- Each student sees and manages only their own progress; progress from other students is never returned.
+
+**`GET /api/courses/{course}/progress` response shape:**
+```json
+{
+  "course_id": 1,
+  "lessons": [
+    {
+      "id": 1,
+      "title": "Setting Up Laravel",
+      "order": 1,
+      "completed": true,
+      "completed_at": "2026-10-17T10:00:00.000000Z"
+    },
+    {
+      "id": 2,
+      "title": "Routing Basics",
+      "order": 2,
+      "completed": false,
+      "completed_at": null
+    }
+  ]
+}
+```
+
+Repeated `complete` requests on an already-completed lesson are idempotent. Marking a lesson `incomplete` clears `completed_at` and allows completion again later.
+
 ## Query Count: GET /api/comments/latest
 
 **Endpoint:** `GET /api/comments/latest`  

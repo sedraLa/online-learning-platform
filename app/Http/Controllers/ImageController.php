@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\ImageServiceInterface;
 use App\Enums\UserRole;
 use App\Http\Requests\StoreImageRequest;
 use App\Models\Assignment;
 use App\Models\Course;
 use App\Models\Lesson;
-use App\Services\ImageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ImageController extends Controller
 {
-    public function __construct(private ImageService $imageService) {}
+    public function __construct(private ImageServiceInterface $imageService) {}
 
     public function forCourse(StoreImageRequest $request, Course $course): JsonResponse
     {

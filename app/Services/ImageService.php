@@ -2,13 +2,14 @@
 
 namespace App\Services;
 
+use App\Contracts\ImageServiceInterface;
 use App\Models\Image;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
-class ImageService
+class ImageService implements ImageServiceInterface
 {
     public function replace(Model $model, UploadedFile $file): Image
     {

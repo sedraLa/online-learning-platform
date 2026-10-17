@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Lesson;
 use App\Policies\CoursePolicy;
 use App\Policies\LessonPolicy;
+use App\Contracts\ImageServiceInterface;
 use App\Services\ImageService;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
@@ -15,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(ImageService::class);
+        $this->app->singleton(ImageServiceInterface::class, ImageService::class);
     }
 
     public function boot(): void

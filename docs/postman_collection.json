@@ -814,6 +814,91 @@
           }
         }
       ]
+    },
+    {
+      "name": "07 Lesson Progress",
+      "item": [
+        {
+          "name": "01 GET /courses/{course_id}/progress — Enrolled student — 200",
+          "description": "Login as carol@example.com (enrolled in course 1). Returns all lessons with completion status.",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/progress", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "progress"] }
+          }
+        },
+        {
+          "name": "02 POST /courses/{course_id}/lessons/{lesson_id}/progress/complete — Mark complete — 200",
+          "description": "Login as carol@example.com. Marks lesson {{lesson_id}} in course {{course_id}} as completed. Idempotent — safe to call more than once.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/lessons/{{lesson_id}}/progress/complete", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "lessons", "{{lesson_id}}", "progress", "complete"] }
+          }
+        },
+        {
+          "name": "03 POST /courses/{course_id}/lessons/{lesson_id}/progress/incomplete — Mark incomplete — 200",
+          "description": "Login as carol@example.com. Clears the completion status of lesson {{lesson_id}}. The lesson can be completed again after this.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/lessons/{{lesson_id}}/progress/incomplete", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "lessons", "{{lesson_id}}", "progress", "incomplete"] }
+          }
+        },
+        {
+          "name": "04 GET /courses/{course_id}/progress — No token — 401",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/progress", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "progress"] }
+          }
+        },
+        {
+          "name": "05 GET /courses/{course_id}/progress — Teacher — 403",
+          "description": "Login as alice@example.com (teacher). Teachers cannot access lesson progress.",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/progress", "host": ["{{base_url}}"], "path": ["courses", "{{course_id}}", "progress"] }
+          }
+        },
+        {
+          "name": "06 GET /courses/4/progress — Student not enrolled in course 4 — 403",
+          "description": "Login as carol@example.com. Carol is enrolled in course 1 but not course 4. Expect 403.",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/4/progress", "host": ["{{base_url}}"], "path": ["courses", "4", "progress"] }
+          }
+        },
+        {
+          "name": "07 GET /courses/{draft_course_id}/progress — Draft course — 404",
+          "description": "Login as student. Course 3 is a draft — expect 404.",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/courses/{{draft_course_id}}/progress", "host": ["{{base_url}}"], "path": ["courses", "{{draft_course_id}}", "progress"] }
+          }
+        }
+      ]
     }
   ]
 }
